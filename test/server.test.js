@@ -1,0 +1,51 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { randomUUID } from 'node:crypto';
+
+test('HTTP: salva, recupera envio repetido, rejeita conflito e protege arquivos privados', async (t) => {
+  const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const temp = await mkdtemp(path.join(tmpdir(), 'fitdance-test-'));
+  const child = spawn(process.execPath, ['server.js'], { cwd: project, env: { ...process.env, STORAGE_MODE: 'local', HOST: '127.0.0.1', PORT: '0', DATA_DIR: temp }, stdio: ['ignore', 'pipe', 'pipe'] });
+  t.after(async () => {
+    child.kill();
+    await new Promise(resolve => { if (child.exitCode !== null) resolve(); else child.once('exit', resolve); });
+    const resolved = path.resolve(temp);
+    if (path.dirname(resolved) === path.resolve(tmpdir()) && path.basename(resolved).startsWith('fitdance-test-')) await rm(resolved, { recursive: true, force: true });
+  });
+  const base = await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('Servidor não iniciou')), 10000);
+    let output = '';
+    child.stdout.on('data', chunk => { output += chunk; const match = output.match(/Site disponível em (http:\/\/[^\s]+)/); if (match) { clearTimeout(timeout); resolve(match[1]); } });
+    child.once('error', reject);
+    child.stderr.on('data', chunk => { if (String(chunk).includes('Error')) { clearTimeout(timeout); reject(new Error(String(chunk))); } });
+  });
+  const post = (body, headers = {}) => fetch(`${base}/api/registrations`, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: base, ...headers }, body: JSON.stringify(body) });
+  const config = await (await fetch(`${base}/api/config`)).json();
+  assert.equal(config.mode, 'local'); assert.equal('GOOGLE_SCRIPT_SECRET' in config, false);
+  for (const asset of ['/', '/cadastro.html', '/credencial.html', '/styles.css', '/app.js', '/home.js', '/result.js', '/credential-session.js', '/credential.js', '/favicon.svg', '/assets/fitdance-hero.png']) assert.equal((await fetch(base + asset)).status, 200, asset);
+  const home = await (await fetch(base + '/')).text();
+  const formPage = await (await fetch(base + '/cadastro.html')).text();
+  const resultPage = await (await fetch(base + '/credencial.html')).text();
+  assert.match(home, /href="\/cadastro\.html"/); assert.doesNotMatch(home, /id="registration-form"|id="success-section"/);
+  assert.match(home, /id="countdown" data-event-date="2026-09-17T18:30:00-03:00"/); assert.match(home, /id="partnership-title"/); assert.match(home, /id="map-frame"/);
+  assert.match(formPage, /id="registration-form"/); assert.doesNotMatch(formPage, /id="hero-title"|id="success-section"/);
+  assert.match(resultPage, /id="result-canvas"/); assert.doesNotMatch(resultPage, /id="registration-form"|id="hero-title"/);
+  const payload = { requestId: randomUUID(), fullName: 'Convidada de Teste', age: 25, whatsapp: '19999991234', membership: 'guest', interest: true, contribution: true, contributionItem: '=IMPORTXML("teste")', consent: true, avatar: 'fox' };
+  const firstResponse = await post(payload); assert.equal(firstResponse.status, 201);
+  const first = await firstResponse.json(); assert.equal(first.credential.demo, true); assert.equal(first.credential.dayPassRequested, true); assert.equal(first.credential.firstName, 'Convidada');
+  const retry = await (await post(payload)).json(); assert.equal(retry.credential.serial, first.credential.serial); assert.equal(retry.credential.id, first.credential.id);
+  const simultaneous = await Promise.all([post(payload), post(payload)]);
+  for (const response of simultaneous) assert.equal((await response.json()).credential.serial, first.credential.serial);
+  assert.equal((await post({ ...payload, fullName: 'Outro Nome' })).status, 409);
+  assert.equal((await post({ ...payload, requestId: randomUUID(), age: 15 })).status, 400);
+  assert.equal((await post(payload, { Origin: 'https://outro-site.example' })).status, 403);
+  const files = await readdir(temp); assert.equal(files.filter(name => name.endsWith('.json')).length, 1);
+  const stored = JSON.parse(await readFile(path.join(temp, `${payload.requestId}.json`), 'utf8')).record;
+  assert.equal(stored.whatsapp, '5519999991234'); assert.equal(stored.contributionItem, payload.contributionItem); assert.equal(stored.interest, true);
+  for (const endpoint of ['/.env', '/event.config.json', '/data/' + payload.requestId + '.json', '/src/domain.js', '/google-apps-script/Code.gs']) assert.equal((await fetch(base + endpoint)).status, 404, endpoint);
+});

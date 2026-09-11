@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffca00">
+  <meta name="description" content="Um aniversário para celebrar dançando. Veja as informações do aulão de FitDance em Campinas e crie sua credencial de participação.">
+  <title>Criar credencial · Bora dançar</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#criar-credencial">Ir para o conteúdo</a>
+  <div class="demo-banner" id="demo-banner" hidden>VERSÃO DE DEMONSTRAÇÃO <span>Cadastros salvos neste computador. Credenciais sem validade para entrada.</span></div>
+  <header class="header wrap">
+    <a class="brand" href="./" aria-label="Bora dançar, início"><span class="brand-mark" aria-hidden="true">✳</span> bora dançar<span class="brand-dot">.</span></a>
+    <nav aria-label="Menu principal"><a href="./#o-aulao">O aulão</a><a class="nav-cta" href="./cadastro.html">Sua credencial <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main class="form-page">
+    <div class="page-back wrap"><a href="./">← Voltar às informações do aulão</a></div>
+    <section class="registration wrap" id="criar-credencial" aria-labelledby="registration-title">
+      <div class="section-heading"><div><div class="eyebrow">SEU NOME NA LISTA. SUA ENERGIA NA PISTA.</div><h1 id="registration-title">Pode chegar.<br><span>Mas antes, sua credencial.</span></h1></div><p>Preencha seus dados e dê seu toque pessoal.<br>A gente cuida do resto.</p></div>
+      <div id="load-error" class="notice error" role="alert" hidden>Não conseguimos carregar as informações do evento. Recarregue a página para tentar novamente.</div>
+      <noscript><p class="notice error">Ative o JavaScript no navegador para criar sua credencial.</p></noscript>
+      <div class="registration-grid">
+        <form id="registration-form">
+          <fieldset class="form-section"><legend><span class="step-number">01</span> Vamos nos conhecer</legend>
+            <div class="field"><label for="fullName">Nome e sobrenome <span>*</span></label><input id="fullName" name="fullName" autocomplete="name" maxlength="120" placeholder="Como você se chama?" required><small>Use o nome que consta no seu documento.</small></div>
+            <div class="field-row"><div class="field"><label for="age">Idade <span>*</span></label><input type="number" id="age" name="age" min="17" max="120" step="1" inputmode="numeric" placeholder="Sua idade" required aria-describedby="age-hint"><small id="age-hint">Participação a partir de 17 anos.</small></div><div class="field"><label for="whatsapp">WhatsApp com DDD <span>*</span></label><input type="tel" id="whatsapp" name="whatsapp" autocomplete="tel" inputmode="tel" maxlength="19" placeholder="(19) 99999-9999" required><small>Para informações sobre o aulão.</small></div></div>
+            <fieldset class="choice-field"><legend>Qual é sua relação com a Smart Fit? <span>*</span></legend><div class="membership-options">
+              <label class="radio-card"><input type="radio" name="membership" value="guest" required><span><strong>Ainda não sou aluno</strong><small>Vou participar como convidado</small></span></label>
+              <label class="radio-card"><input type="radio" name="membership" value="other"><span><strong>Sou de outra unidade</strong><small>E não tenho plano Black</small></span></label>
+              <label class="radio-card"><input type="radio" name="membership" value="unit"><span><strong>Sou aluno desta unidade</strong><small>Já treino por aqui</small></span></label>
+              <label class="radio-card"><input type="radio" name="membership" value="black"><span><strong>Tenho plano Black</strong><small>Meu plano permite outras unidades</small></span></label>
+            </div></fieldset>
+            <div class="daypass-box"><span class="benefit-tag">ALÉM DO AULÃO</span><fieldset class="choice-field"><legend>Quer conhecer mais a academia? <span>*</span></legend><p id="daypass-note">Marque seu interesse para solicitar um passe de um dia. A liberação e as condições serão confirmadas pela unidade.</p><div class="inline-options"><label><input type="radio" name="interest" value="yes" required> Sim, tenho interesse!</label><label><input type="radio" name="interest" value="no"> Agora não</label></div></fieldset></div>
+          </fieldset>
+          <fieldset class="form-section"><legend><span class="step-number">02</span> Sua credencial, sua cara</legend><p class="fieldset-intro">Escolha um personagem ou use uma foto sua.</p>
+            <div class="avatar-options" role="group" aria-label="Escolha um personagem">
+              <button class="avatar-option selected" type="button" data-avatar="disco" aria-label="Personagem disco" aria-pressed="true">🪩</button><button class="avatar-option" type="button" data-avatar="cool" aria-label="Personagem de óculos" aria-pressed="false">😎</button><button class="avatar-option" type="button" data-avatar="fox" aria-label="Personagem raposa" aria-pressed="false">🦊</button><button class="avatar-option" type="button" data-avatar="cat" aria-label="Personagem gato" aria-pressed="false">🐱</button><button class="avatar-option" type="button" data-avatar="butterfly" aria-label="Personagem borboleta" aria-pressed="false">🦋</button><button class="avatar-option" type="button" data-avatar="robot" aria-label="Personagem robô" aria-pressed="false">🤖</button>
+            </div>
+            <div class="photo-actions"><button type="button" class="button button-secondary" id="gallery-button"><span aria-hidden="true">▧</span> Escolher da galeria</button><button type="button" class="button button-secondary" id="camera-button"><span aria-hidden="true">◎</span> Tirar uma foto</button></div>
+            <input type="file" id="gallery-input" accept="image/jpeg,image/png,image/webp" hidden><input type="file" id="capture-input" accept="image/*" capture="user" hidden>
+            <p id="photo-status" class="field-help" role="status">JPG, PNG ou WebP, até 10 MB. A foto será recortada no centro.</p><button type="button" id="remove-photo" class="text-button" hidden>Remover foto e usar personagem</button>
+          </fieldset>
+          <fieldset class="form-section"><legend><span class="step-number">03</span> Uma festa feita por todos</legend>
+            <fieldset class="choice-field"><legend>Você pode contribuir com comes e bebes? <span>*</span></legend><p>É opcional. O mais importante é ter você com a gente.</p><div class="inline-options"><label><input type="radio" name="contribution" value="yes" required> Sim, vou levar algo</label><label><input type="radio" name="contribution" value="no"> Desta vez não</label></div></fieldset>
+            <div class="field contribution-detail" id="contribution-detail" hidden><label for="contributionItem">O que você pretende levar? <span>*</span></label><input id="contributionItem" name="contributionItem" maxlength="200" placeholder="Ex.: bolo, frutas, suco, salgadinhos…" disabled></div>
+          </fieldset>
+          <div class="submit-area"><label class="consent"><input type="checkbox" name="consent" id="consent" required><span>Concordo com o uso dos meus dados e, se enviada, da minha foto para organizar o aulão e emitir minha credencial. Se eu marcar interesse, autorizo contato pelo WhatsApp sobre o passe de um dia. <button type="button" id="privacy-button" class="inline-link">Como meus dados são usados</button></span></label><p id="form-error" class="notice error" role="alert" tabindex="-1" hidden></p><button type="submit" class="button button-primary submit-button" id="submit-button" disabled>Criar minha credencial <span aria-hidden="true">↗</span></button><p class="submit-note">Confira seus dados antes de enviar. Campos com * são obrigatórios.</p></div>
+        </form>
+        <aside class="preview-column" aria-label="Prévia da sua credencial"><div class="preview-sticky"><div class="preview-heading"><span>SUA CREDENCIAL</span><span id="preview-label">PRÉVIA</span></div><div class="credential-wrap"><canvas id="credential-canvas" width="720" height="1060" role="img" aria-label="Prévia da credencial. Preencha o formulário para personalizar."></canvas></div><p class="preview-caption" id="preview-caption">Uma combinação de cores só sua.<br>O código será gerado ao concluir o cadastro.</p><div class="credential-footer"><span aria-hidden="true">✳</span><p>Feita para celebrar.<br>Pronta para dançar.</p></div></div></aside>
+      </div>
+    </section>
+  </main>
+  <footer class="footer wrap"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">✳</span> bora dançar<span class="brand-dot">.</span></a><p>Um encontro para celebrar em movimento.</p><span>FITDANCE · CAMPINAS</span></footer>
+  <dialog id="camera-dialog"><div class="dialog-top"><h2>Sorria, é sua credencial!</h2><button type="button" class="close-button" id="camera-close" aria-label="Fechar câmera">×</button></div><video id="camera-video" autoplay playsinline muted></video><p id="camera-status" role="status">Permita o acesso à câmera para tirar sua foto.</p><button type="button" class="button button-primary" id="take-photo" disabled>Capturar foto</button></dialog>
+  <dialog id="privacy-dialog"><div class="dialog-top"><h2>Sobre seus dados</h2><button type="button" class="close-button" id="privacy-close" aria-label="Fechar informações de privacidade">×</button></div><p>Usamos nome, idade, WhatsApp, vínculo com a academia, personagem ou foto e respostas para organizar os convidados, emitir a credencial e planejar os comes e bebes.</p><p>O interesse em conhecer a academia será usado para solicitar o passe de um dia e permitir contato sobre ele. O passe depende de confirmação da unidade.</p><p id="privacy-storage"></p><p>Uma cópia da credencial fica temporariamente na sessão desta aba, para abrir e atualizar a página de visualização. Baixe a imagem para guardar no celular.</p><p>Para corrigir ou excluir seus dados, procure <span id="privacy-contact">a organização do evento</span>.</p><p>A foto é opcional: você pode escolher um personagem.</p></dialog>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffca00">
+  <meta name="description" content="Um aniversário para celebrar dançando. Veja as informações do aulão de FitDance em Campinas e crie sua credencial de participação.">
+  <title>Sua credencial · Bora dançar</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./result.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#credential-main">Ir para o conteúdo</a>
+  <div class="demo-banner" id="demo-banner" hidden>VERSÃO DE DEMONSTRAÇÃO <span>Cadastros salvos neste computador. Credenciais sem validade para entrada.</span></div>
+  <header class="header wrap">
+    <a class="brand" href="./" aria-label="Bora dançar, início"><span class="brand-mark" aria-hidden="true">✳</span> bora dançar<span class="brand-dot">.</span></a>
+    <nav aria-label="Menu principal"><a href="./#o-aulao">O aulão</a><a class="nav-cta" href="./cadastro.html">Sua credencial <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="credential-main" class="result-page">
+    <div class="page-back wrap"><a href="./">← Voltar às informações do aulão</a></div>
+    <section class="empty-credential wrap" id="empty-credential" hidden><span class="eyebrow">SUA CREDENCIAL</span><h1>Vamos criar a sua?</h1><p>Conclua o cadastro para ver sua credencial nesta página. Se você já criou uma em outra aba ou dispositivo, abra por lá ou use a imagem que baixou.</p><a class="button button-primary" href="./cadastro.html">Criar uma credencial <span aria-hidden="true">↗</span></a></section>
+    <section class="success-section wrap" id="success-section" hidden aria-labelledby="success-title" tabindex="-1"><div class="success-icon" aria-hidden="true">✓</div><span class="eyebrow">AGORA É SÓ ENTRAR NO RITMO</span><h1 id="success-title">Sua credencial está pronta!</h1><p id="success-message"></p><div class="success-grid"><canvas id="result-canvas" width="720" height="1060" role="img" aria-label="Sua credencial personalizada"></canvas><div class="success-details"><h3 id="success-name"></h3><p id="success-category"></p><p class="serial-text" id="success-serial"></p><p id="success-entry"></p><p id="success-pass" class="notice" hidden>Seu interesse no passe de um dia foi registrado. Aguarde a confirmação da unidade.</p><button type="button" class="button button-primary" id="download-button">Baixar credencial <span aria-hidden="true">↓</span></button><a class="button button-secondary" href="./cadastro.html">Criar outra credencial</a><small>Salve a imagem no celular e apresente na recepção.</small></div></div></section>
+    <noscript><p class="wrap notice error">Ative o JavaScript para visualizar sua credencial.</p></noscript>
+  </main>
+  <footer class="footer wrap"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">✳</span> bora dançar<span class="brand-dot">.</span></a><p>Um encontro para celebrar em movimento.</p><span>FITDANCE · CAMPINAS</span></footer>
+</body>
+</html>

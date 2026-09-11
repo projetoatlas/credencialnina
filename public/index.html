@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffca00">
+  <meta name="description" content="Um aniversário para celebrar dançando. Veja as informações do aulão de FitDance em Campinas e crie sua credencial de participação.">
+  <title>Nina · Aulão de aniversário</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./home.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#inicio">Ir para as informações</a>
+  <div class="demo-banner" id="demo-banner" hidden>VERSÃO DE DEMONSTRAÇÃO <span>Cadastros salvos neste computador. Credenciais sem validade para entrada.</span></div>
+  <header class="header wrap">
+    <a class="brand" href="#inicio" aria-label="Bora dançar, início"><span class="brand-mark" aria-hidden="true">✳</span> bora dançar<span class="brand-dot">.</span></a>
+    <nav aria-label="Menu principal"><a href="#o-aulao">O aulão</a><a class="nav-cta" href="./cadastro.html">Sua credencial <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="inicio">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="mini-line"></span> ANIVERSÁRIO + FITDANCE</div>
+        <h1 id="hero-title">O aniversário é meu.<br>Mas a festa é <em>nossa</em>.</h1>
+        <p class="hero-description" id="event-description">Nossa querida instrutora de FitDance, Nina, vai comemorar seu aniversário com um mega aulão coletivo na Smart Fit do Castelo! Uma festa da comunidade, para dançar, se divertir e celebrar juntinho.</p>
+        <p class="hero-description">Todo mundo está convidado! Para entrar como convidado, é só fazer sua credencial aqui no site e apresentar na recepção da Smart Fit.</p>
+        <p class="hero-location"><span aria-hidden="true">⌖</span> <span id="hero-unit">Smart Fit Castelo</span> <span class="divider">/</span> <span id="hero-city">Campinas · SP</span></p>
+        <a class="button button-primary hero-cta" href="./cadastro.html"><span class="hero-cta-kicker">ENTRADA DE CONVIDADO</span><span class="hero-cta-label">Criar minha credencial</span><span class="hero-cta-arrow" aria-hidden="true">↗</span></a>
+        <span class="hero-note">Sua presença já é um presente.</span>
+      </div>
+      <section class="card-stack" id="party-cards" aria-label="Fotos e recados da festa" aria-roledescription="carrossel">
+        <div class="stack-stage">
+      <figure class="hero-art stack-card" data-position="0" role="group" aria-label="1 de 5">
+        <img src="./assets/Tropa-da-Nina.jpg" alt="Turma da Tropa da Nina reunida na academia" width="1122" height="1402" fetchpriority="high">
+        <div class="art-top"><span>EDIÇÃO DE ANIVERSÁRIO</span><span aria-hidden="true">✳</span></div>
+        <div class="art-bottom"><span>MAIS VIDA.<br>MAIS DANÇA.</span><span class="round-stamp">Vem pra<br>Tropa ↗</span></div>
+        <figcaption>Tropa da Nina</figcaption>
+      </figure>
+      <figure class="hero-art stack-card" data-position="1" role="group" aria-label="2 de 5" aria-hidden="true">
+        <img src="./assets/cards/galera.jpg" alt="Foto ilustrativa de uma aula de dança" width="1000" height="800" decoding="async">
+        <div class="art-top"><span>NO RITMO DA NINA</span><span aria-hidden="true">✳</span></div>
+        <div class="art-bottom"><span>JUNTOS NA<br>MESMA BATIDA.</span><span class="round-stamp">Bora<br>dançar!</span></div>
+        <figcaption>Foto ilustrativa · Dança</figcaption>
+      </figure>
+      <figure class="hero-art stack-card" data-position="2" role="group" aria-label="3 de 5" aria-hidden="true" inert>
+        <img src="./assets/cards/Insta-Tropa.jpg" alt="Logo colorido da Tropa da Nina" width="1200" height="1800" decoding="async">
+        <div class="art-top"><span>A TROPA TAMBÉM TÁ NO INSTA!</span><span aria-hidden="true">✳</span></div>
+        <div class="art-bottom"><span>VEM CONHECER<br>NOSSO INSTAGRAM!</span><a class="round-stamp card-instagram" href="https://www.instagram.com/tropa_danina/" target="_blank" rel="noopener noreferrer" aria-label="Conheça o Instagram da Tropa da Nina (abre em nova aba)">Visitar<br>perfil ↗</a></div>
+        <figcaption>@tropa_danina</figcaption>
+      </figure>
+      <figure class="hero-art stack-card" data-position="3" role="group" aria-label="4 de 5" aria-hidden="true">
+        <img src="./assets/cards/nina.jpg" alt="Foto ilustrativa de comida para compartilhar" width="1000" height="800" decoding="async">
+        <div class="art-top"><span>CADA UM LEVA UM POUQUINHO</span><span aria-hidden="true">✳</span></div>
+        <div class="art-bottom"><span>TRAZ UM LANCHE.<br>DIVIDE A ALEGRIA.</span><span class="round-stamp">Se<br>puder ♥</span></div>
+        <figcaption>Foto ilustrativa · Comes e bebes</figcaption>
+      </figure>
+      <figure class="hero-art stack-card" data-position="4" role="group" aria-label="5 de 5" aria-hidden="true">
+        <img src="./assets/cards/niners.jpg" alt="Foto ilustrativa de uma comemoração de aniversário" width="1000" height="800" decoding="async">
+        <div class="art-top"><span>PARABÉNS, NINA!</span><span aria-hidden="true">✳</span></div>
+        <div class="art-bottom"><span>O MELHOR PRESENTE<br>É TER VOCÊ AQUI.</span><span class="round-stamp">Vem<br>celebrar!</span></div>
+        <figcaption>Foto ilustrativa · Aniversário</figcaption>
+      </figure>
+        </div>
+        <div class="stack-controls" hidden>
+          <span id="stack-count" aria-live="off">1 / 5</span>
+          <button type="button" id="stack-pause" aria-label="Pausar troca automática dos cards">Pausar</button>
+          <button type="button" id="stack-next" aria-label="Mostrar próximo card">Próximo <span aria-hidden="true">↗</span></button>
+        </div>
+      </section>
+    </section>
+    <section class="event-overview wrap" id="o-aulao" aria-labelledby="countdown-title">
+      <div class="countdown-panel" aria-live="polite">
+        <div class="eyebrow"><span class="mini-line"></span> CONTAGEM REGRESSIVA</div>
+        <h2 id="countdown-title">Até a gente se encontrar.</h2>
+        <div class="countdown" id="countdown" data-event-date="2026-09-17T18:30:00-03:00"><div class="countdown-unit"><strong id="countdown-days">—</strong><span>dias</span></div><div class="countdown-separator" aria-hidden="true">:</div><div class="countdown-unit"><strong id="countdown-hours">—</strong><span>horas</span></div><div class="countdown-separator" aria-hidden="true">:</div><div class="countdown-unit"><strong id="countdown-minutes">—</strong><span>minutos</span></div><div class="countdown-separator" aria-hidden="true">:</div><div class="countdown-unit"><strong id="countdown-seconds">—</strong><span>segundos</span></div></div>
+       
+      </div>
+      <div class="partnership" aria-labelledby="partnership-title">
+        <div class="partnership-copy"><div class="eyebrow"><span class="mini-line"></span> UMA FESTA FEITA POR TODO MUNDO</div><h2 id="partnership-title">Tropa da Nina <span>+</span> Smart Fit</h2><p>Vamos fazer essa comemoração juntos? Se puder, leve comes e bebes para compartilhar com a turma. Cada um contribui com o que conseguir — o mais importante é ter você com a gente!</p></div>
+        <div class="partner-lockup" role="img" aria-label="Tropa da Nina mais Smart Fit"><div class="partner-logo partner-tropa"><img src="./assets/partners/tropa-da-nina-logo.png" alt="Logo Tropa da Nina" width="960" height="640"></div><span class="partner-plus" aria-hidden="true">+</span><div class="partner-logo partner-smartfit"><img src="./assets/partners/smartfit-logo.png" alt="Logo Smart Fit" width="596" height="336"></div></div>
+      </div>
+    </section>
+    <div class="event-notes wrap"><p id="what-to-bring"></p><p id="entry-note"></p></div>
+    <section class="location-card wrap" aria-labelledby="location-title"><div class="location-copy"><div class="eyebrow"><span class="mini-line"></span> COMO CHEGAR</div><h2 id="location-title">Nos vemos no Castelo.</h2><p id="location-address">Avenida Francisco José de Camargo Andrade, 262 · Jardim Chapadão · Campinas, SP · 13070-055</p><a class="map-link" id="map-link" href="https://www.google.com/maps/search/?api=1&query=Smart+Fit+Castelo%2C+Avenida+Francisco+Jos%C3%A9+de+Camargo+Andrade%2C+262%2C+Campinas%2C+SP" target="_blank" rel="noopener">Abrir rota no Google Maps <span aria-hidden="true">↗</span></a></div><div class="map-frame"><iframe id="map-frame" title="Mapa da Smart Fit Castelo em Campinas" src="https://www.google.com/maps?q=Smart+Fit+Castelo%2C+Avenida+Francisco+Jos%C3%A9+de+Camargo+Andrade%2C+262%2C+Campinas%2C+SP&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></section>
+    
+  </main>
+  <footer class="footer wrap"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">✳</span> bora dançar<span class="brand-dot">.</span></a><p>Um encontro para celebrar em movimento.</p><span>FITDANCE · CAMPINAS</span></footer>
+</body>
+</html>
