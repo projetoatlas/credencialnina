@@ -4,9 +4,11 @@
 
 O projeto já inclui `.github/workflows/pages.yml` e `.nojekyll`. Envie o conteúdo desta pasta para um repositório GitHub, use a branch `main` ou `master` e, em **Settings → Pages**, selecione **GitHub Actions**. A cada push, o workflow publica a pasta `public/` automaticamente.
 
-O GitHub Pages hospeda somente os arquivos estáticos. Por isso, a página e a prévia da credencial funcionam nele, mas os cadastros feitos nesse modo ficam marcados como demonstração no navegador e não são enviados ao Google Planilhas. Para salvar dados reais, mantenha o `server.js` em um serviço Node/servidor e configure `GOOGLE_SCRIPT_URL`, `GOOGLE_SCRIPT_SECRET` e `PUBLIC_ORIGIN`; nunca envie `.env` ou `data/` ao GitHub.
+O GitHub Pages publica a pasta public/ e o formulário envia diretamente ao Google Apps Script indicado em public/site-config.js. O envio usa POST com JSON em text/plain e aguarda a confirmação real da planilha antes de abrir a credencial. Falhas de conexão nunca geram uma credencial de demonstração.
 
-Para uma publicação Pages no endereço raiz `usuario.github.io`, os caminhos atuais funcionam diretamente. Em um endereço de projeto `usuario.github.io/nome-do-repositorio`, use a configuração de Pages com o artefato na raiz do domínio ou ajuste os links absolutos antes de publicar.
+Para atualizar a integração, copie google-apps-script/Code.gs ao projeto existente do Apps Script e use **Implantar → Gerenciar implantações → Editar → Nova versão**. Mantenha a implantação executando como o proprietário, com acesso **Qualquer pessoa**, e preserve as propriedades existentes SPREADSHEET_ID, PHOTO_FOLDER_ID e SHARED_SECRET. A URL pública /exec vai em googleScriptUrl; o segredo HMAC nunca vai ao navegador. A rota pública valida os campos no Google e gera série, categoria e cores no servidor. Ela não oferece consulta de convidados. Fotos ficam privadas no Drive, e os dados na planilha privada existente.
+
+Os caminhos são relativos e funcionam em usuario.github.io/nome-do-repositorio/. O servidor Node continua disponível para desenvolvimento e hospedagem própria; o modo local explícito continua sendo demonstração. Nunca envie .env ou data/ ao GitHub.
 
 Projeto para abrir no VS Code, feito com **HTML, CSS e JavaScript**, com um servidor **Node.js sem dependências externas**. A integração com Google Planilhas e Drive usa um pequeno Google Apps Script.
 
@@ -22,7 +24,7 @@ node --env-file-if-exists=.env server.js
 
 4. Abra **http://127.0.0.1:3000**. Também é possível apertar **F5** no VS Code ou usar `npm run dev` para reiniciar o servidor automaticamente quando editar arquivos.
 
-Não é necessário executar `npm install`. Use o servidor Node, porque o formulário depende da API; abrir o HTML diretamente ou usar apenas Live Server não executa essa API.
+Não é necessário executar `npm install`. O servidor Node usa a API local. No Pages ou em um servidor estático, o formulário usa a implantação pública do Apps Script. Abra por HTTP/HTTPS, não diretamente como arquivo.
 
 ## O que está pronto
 
@@ -34,7 +36,7 @@ A página final usa uma cópia temporária da credencial na sessão da mesma aba
 - Nome e sobrenome, idade, WhatsApp com DDD e vínculo com a academia.
 - Quatro categorias: convidado não aluno, convidado de outra unidade sem Black, aluno da unidade e aluno Black. O vínculo é informado pelo participante.
 - Pergunta sobre interesse em conhecer a academia; para convidados interessados, registra a solicitação do passe de um dia.
-- Foto da galeria, captura com câmera ou seis personagens. A foto é recortada no centro, reduzida para 600 × 600 e convertida em JPEG, sem conservar os metadados do arquivo original.
+- Foto da galeria, captura com câmera ou seis personagens. A foto passa por uma janela de recorte com arraste, zoom e controles de posição, é reduzida para 600 × 600 e convertida em JPEG, sem conservar os metadados do arquivo original.
 - Contribuição opcional com comes e bebes; o detalhe é obrigatório se a resposta for “sim”.
 - Credencial com degradê sorteado, foto/personagem, primeiro nome grande, nome completo, categoria, evento e código EAN-13 com número aleatório e dígito verificador.
 - Download da credencial em PNG, proteção contra duplo envio e confirmação somente depois de salvar.
@@ -44,7 +46,7 @@ O código de barras identifica o cadastro. O projeto não está integrado às ca
 
 ## Personalizar o evento
 
-Edite `event.config.json` e reinicie o servidor:
+Edite `event.config.json` para o servidor local. Para Pages, mantenha também `public/site-config.js` e `PUBLIC_EVENT` em `google-apps-script/Code.gs` atualizados e publique uma nova versão do Apps Script:
 
 | Campo | O que preencher |
 | --- | --- |

@@ -318,3 +318,14 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline-color: #972
   .event-overview .partner-lockup { gap: 7px; }
   .event-overview .partner-plus { width: 28px; height: 28px; }
 }
+
+/* Enquadramento acessível por toque, mouse ou controles de teclado. */
+#crop-dialog { width: min(480px, calc(100% - 24px)); max-height: 92dvh; overflow: auto; }
+#crop-dialog h2 { font-size: 1.4rem; }
+.crop-stage { position: relative; width: min(100%, 320px); aspect-ratio: 1; margin: 16px auto; overflow: hidden; border-radius: 18px; background: #191919; }
+.crop-stage canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.crop-stage canvas:active { cursor: grabbing; }
+.crop-mask { position: absolute; inset: 0; pointer-events: none; border-radius: 50%; box-shadow: 0 0 0 90px #13131388; border: 2px solid #ffca00; }
+.crop-controls { display: grid; grid-template-columns: 1fr 1.2fr; align-items: center; gap: 12px; margin: 18px 0; font-size: .85rem; }
+.crop-controls input { width: 100%; accent-color: #8a33dc; min-height: 28px; }
+#crop-confirm { width: 100%; }

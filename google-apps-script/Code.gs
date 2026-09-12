@@ -1,9 +1,24 @@
 /**
  * Cole este arquivo em https://script.google.com/ e execute setup() uma vez.
  * Depois implante como Aplicativo da Web: executar como você, acesso Qualquer pessoa.
- * O endpoint aceita SOMENTE envios assinados pelo servidor Node.
+ * O endpoint aceita o formulário público do Pages e envios assinados pelo servidor Node.
  * Nunca exponha SHARED_SECRET no navegador, no Git ou na planilha.
  */
+const PUBLIC_EVENT = {
+  "title": "Aulão de aniversário",
+  "instructorName": "",
+  "date": "2026-09-17",
+  "time": "18h30",
+  "unit": "Smart Fit Castelo",
+  "city": "Campinas · SP",
+  "address": "Avenida Francisco José de Camargo Andrade, 262 · Jardim Chapadão · Campinas, SP · 13070-055",
+  "minimumAge": 17,
+  "whatToBring": "Venha com roupa confortável, tênis e sua garrafinha de água.",
+  "entryNote": "Apresente sua credencial e um documento na recepção. A entrada depende da validação da unidade.",
+  "dayPassNote": "Marque seu interesse para solicitar um passe de um dia. A liberação e as condições serão confirmadas pela unidade.",
+  "privacyContact": "a organização do evento",
+  "consentVersion": "2026-09-10-v1"
+};
 const HEADERS = [
   'Data do cadastro', 'ID do envio', 'Número de série', 'Nome completo', 'Primeiro nome',
   'Idade', 'WhatsApp', 'Vínculo com a Smart Fit', 'Categoria da credencial',
@@ -55,7 +70,10 @@ function getSheet_(props) {
   return sheet;
 }
 
-function doGet() { return output_({ ok: false, code: 'POST_REQUIRED' }); }
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action === 'health') return output_({ ok: true, protocol: 'fitdance-pages-v1' });
+  return output_({ ok: false, code: 'POST_REQUIRED' });
+}
 function doPost(e) {
   let lock = null;
   try {
@@ -64,11 +82,19 @@ function doPost(e) {
     if (!secret || secret.length < 32 || !props.getProperty('SPREADSHEET_ID') || !props.getProperty('PHOTO_FOLDER_ID')) return output_({ ok: false, code: 'NOT_CONFIGURED' });
     if (!e || !e.postData || !e.postData.contents || e.postData.contents.length > 550000) return output_({ ok: false, code: 'INVALID_REQUEST' });
     const envelope = JSON.parse(e.postData.contents);
-    if (typeof envelope.payload !== 'string' || !/^[a-f0-9]{64}$/.test(envelope.signature || '')) return output_({ ok: false, code: 'UNAUTHORIZED' });
-    const expected = hex_(Utilities.computeHmacSha256Signature(envelope.payload, secret, Utilities.Charset.UTF_8));
-    if (!safeEqual_(expected, envelope.signature)) return output_({ ok: false, code: 'UNAUTHORIZED' });
-    const message = JSON.parse(envelope.payload);
-    if (!Number.isFinite(message.timestamp) || Math.abs(Date.now() - message.timestamp) > 5 * 60 * 1000) return output_({ ok: false, code: 'EXPIRED' });
+    const isPublic = envelope.action === 'register';
+    let message;
+    if (isPublic) {
+      const registration = publicRegistration_(envelope.registration, props);
+      const fingerprint = hex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, JSON.stringify(registration), Utilities.Charset.UTF_8));
+      message = { record: publicRecord_(registration), fingerprint: fingerprint };
+    } else {
+      if (typeof envelope.payload !== 'string' || !/^[a-f0-9]{64}$/.test(envelope.signature || '')) return output_({ ok: false, code: 'UNAUTHORIZED' });
+      const expected = hex_(Utilities.computeHmacSha256Signature(envelope.payload, secret, Utilities.Charset.UTF_8));
+      if (!safeEqual_(expected, envelope.signature)) return output_({ ok: false, code: 'UNAUTHORIZED' });
+      message = JSON.parse(envelope.payload);
+      if (!Number.isFinite(message.timestamp) || Math.abs(Date.now() - message.timestamp) > 5 * 60 * 1000) return output_({ ok: false, code: 'EXPIRED' });
+    }
     const record = message.record;
     validate_(record, Number(props.getProperty('MINIMUM_AGE') || '17'));
     if (!/^[a-f0-9]{64}$/.test(message.fingerprint || '')) throw new Error('INVALID_DATA');
@@ -81,7 +107,7 @@ function doPost(e) {
       if (previous) {
         const saved = sheet.getRange(previous.getRow(), 28, 1, 2).getValues()[0];
         if (String(saved[0]) !== message.fingerprint) return output_({ ok: false, code: 'IDEMPOTENCY_CONFLICT' });
-        return output_({ ok: true, duplicate: true, credential: JSON.parse(String(saved[1])) });
+        return output_({ ok: true, storage: 'google', duplicate: true, credential: JSON.parse(String(saved[1])) });
       }
     }
     // O código de barras é único nesta lista, inclusive se houver uma colisão aleatória.
@@ -124,7 +150,7 @@ function doPost(e) {
     range.setNumberFormat('@');
     range.setValues([row.map(sheetText_)]);
     SpreadsheetApp.flush();
-    return output_({ ok: true, credential: credential });
+    return output_({ ok: true, storage: 'google', credential: credential });
   } catch (error) {
     // Não retorna nome, telefone, foto, segredo ou detalhes internos em erros.
     return output_({ ok: false, code: error.message === 'INVALID_DATA' ? 'INVALID_DATA' : 'SAVE_FAILED' });
@@ -157,3 +183,39 @@ function safeEqual_(a, b) { if (a.length !== b.length) return false; let diff = 
 function eanCheck_(base) { let sum = 0; for (let i = 0; i < 12; i++) sum += Number(base[i]) * (i % 2 ? 3 : 1); return String((10 - sum % 10) % 10); }
 function randomSerial_() { const raw = Utilities.getUuid().replace(/[^0-9]/g, '') + Utilities.getUuid().replace(/[^0-9]/g, ''); const base = raw.slice(0, 12).padEnd(12, '0'); return base + eanCheck_(base); }
 function output_(body) { return ContentService.createTextOutput(JSON.stringify(body)).setMimeType(ContentService.MimeType.JSON); }
+
+// Somente campos permitidos entram no registro. Série, categoria e evento vêm do servidor.
+function publicRegistration_(body, props) {
+  const fail = function () { throw new Error('INVALID_DATA'); };
+  const clean = function (value, max) { return typeof value === 'string' ? value.normalize('NFC').trim().replace(/\s+/g, ' ').slice(0, max) : ''; };
+  if (!body || typeof body !== 'object') fail();
+  const fullName = clean(body.fullName, 120);
+  if (fullName.length < 4 || !/^\p{L}[\p{L}\p{M}'’.-]*(?: [\p{L}\p{M}'’.-]+)+$/u.test(fullName)) fail();
+  const age = Number(body.age);
+  if (body.age === '' || !Number.isInteger(age) || age < Number(props.getProperty('MINIMUM_AGE') || '17') || age > 120) fail();
+  if (['guest', 'other', 'unit', 'black'].indexOf(body.membership) < 0) fail();
+  const raw = typeof body.whatsapp === 'string' ? body.whatsapp.replace(/\D/g, '') : '';
+  const phone = raw.length === 13 && raw.indexOf('55') === 0 ? raw.slice(2) : raw;
+  if (!/^[1-9]{2}9\d{8}$/.test(phone)) fail();
+  if (typeof body.interest !== 'boolean' || typeof body.contribution !== 'boolean' || body.consent !== true) fail();
+  const item = body.contribution ? clean(body.contributionItem, 200) : '';
+  if (body.contribution && item.length < 2) fail();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(body.requestId || '')) fail();
+  const photo = body.photo || null;
+  if (photo && (typeof photo !== 'string' || photo.length > 470000)) fail();
+  if (!photo && ['disco', 'cool', 'fox', 'cat', 'butterfly', 'robot'].indexOf(body.avatar) < 0) fail();
+  return { requestId: body.requestId, fullName: fullName, age: age, whatsapp: '55' + phone,
+    membership: body.membership, interest: body.interest, contribution: body.contribution,
+    contributionItem: item, consent: true, consentVersion: PUBLIC_EVENT.consentVersion,
+    avatar: photo ? 'photo' : body.avatar, photo: photo };
+}
+function publicRecord_(registration) {
+  const categories = { guest: 'CONVIDADO · NÃO ALUNO', other: 'CONVIDADO · OUTRA UNIDADE', unit: 'ALUNO · UNIDADE DO EVENTO', black: 'ALUNO · PLANO BLACK' };
+  const palettes = [['#ff62b4','#955dff','#ffb65d'],['#ffc15c','#ff6b79','#ca65e9'],['#64e2d4','#5c88fa','#b77eff'],['#baf56b','#63cfb6','#8195ff'],['#ff87b2','#fd9159','#ffda74']];
+  const interest = ['guest', 'other'].indexOf(registration.membership) >= 0 && registration.interest;
+  return Object.assign({}, registration, { id: Utilities.getUuid(), serial: randomSerial_(),
+    firstName: registration.fullName.split(' ')[0], category: categories[registration.membership],
+    palette: palettes[Math.floor(Math.random() * palettes.length)], createdAt: new Date().toISOString(),
+    event: { title: PUBLIC_EVENT.title, instructorName: PUBLIC_EVENT.instructorName, date: PUBLIC_EVENT.date, time: PUBLIC_EVENT.time, unit: PUBLIC_EVENT.unit, city: PUBLIC_EVENT.city },
+    dayPassRequested: interest, dayPassStatus: interest ? 'INTERESSE REGISTRADO · AGUARDA UNIDADE' : 'NÃO SOLICITADO' });
+}

@@ -235,3 +235,39 @@ test('setup can run twice without recreating configured resources or appending d
   assert.equal(h.state.props.get('SHARED_SECRET'), secret); assert.equal(secret.length, 64); assert.equal(h.state.props.get('MINIMUM_AGE'), '17');
   assert.equal(h.sheet().getLastRow(), 1); assert.equal(h.sheet().getMaxColumns(), 29);
 });
+
+function publicSend(h, overrides = {}) {
+ const body = { requestId: '550e8400-e29b-41d4-a716-446655440000', fullName: 'Teste Integração', age: 25, whatsapp: '(19) 99999-9999', membership: 'guest', interest: true, contribution: true, contributionItem: 'Bolo', consent: true, avatar: 'disco', photo: null, ...overrides };
+ return JSON.parse(h.context.doPost({postData:{contents:JSON.stringify({action:'register',registration:body})}}).text);
+}
+test('Pages saves a real row and creates trusted metadata; retry does not duplicate', () => {
+ const h = mockRuntime();
+ const result = publicSend(h, {serial:'fake', event:{title:'fake'}, category:'fake', demo:true});
+ assert.equal(result.ok, true); assert.equal(result.storage, 'google');
+ assert.equal(result.credential.category, 'CONVIDADO · NÃO ALUNO');
+ assert.equal(result.credential.event.date, '2026-09-17');
+ assert.match(result.credential.serial, /^\d{13}$/);
+ assert.equal(h.sheet().getLastRow(), 2);
+ const again = publicSend(h);
+ assert.equal(again.ok, true); assert.equal(again.duplicate, true);
+ assert.equal(again.credential.serial, result.credential.serial);
+ assert.equal(h.sheet().getLastRow(), 2);
+ assert.equal(publicSend(h, {fullName:'Outro Nome'}).code, 'IDEMPOTENCY_CONFLICT');
+});
+test('Pages rejects invalid input and does not confirm a failed sheet write', () => {
+ for(const invalid of [{age:16},{consent:false},{whatsapp:'123'},{fullName:'Ana'},{membership:'admin'},{photo:'data:image/png;base64,invalid'},{interest:'yes'}]) {
+  const h=mockRuntime(); assert.equal(publicSend(h,invalid).ok,false); assert.equal(h.state.rawWrites.length,0);
+ }
+ const h=mockRuntime();h.state.failNextDataWrite=true;
+ assert.equal(publicSend(h).code,'SAVE_FAILED');
+ assert.equal(publicSend(h).ok,true); assert.equal(h.sheet().getLastRow(),2);
+});
+test('Pages stores uploaded photo privately and excludes photo bytes/contact from response', () => {
+ const h=mockRuntime(); const photo='data:image/jpeg;base64,'+Buffer.from([255,216,255,...Array(100).fill(0)]).toString('base64');
+ const result=publicSend(h,{photo});
+ assert.equal(result.ok,true); assert.equal(h.state.fileCreates,1);
+ assert.equal(result.credential.avatar,'photo');
+ assert.equal(result.credential.photo,undefined); assert.equal(result.credential.whatsapp,undefined);
+ assert.equal(h.sheet().cells[1][14],'photo'); assert.match(h.sheet().cells[1][15],/drive.google.com/);
+ assert.equal(publicSend(h,{photo}).duplicate,true); assert.equal(h.state.fileCreates,1);
+});

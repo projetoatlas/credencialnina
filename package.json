@@ -8,7 +8,9 @@
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --watch --env-file-if-exists=.env server.js",
     "test": "node --test",
-    "check": "node --check server.js && node --check public/app.js && node --check public/home.js && node --check public/result.js && node --check public/credential-session.js && node --check src/domain.js && node --check src/google-client.js && node --check public/credential.js"
+    "check": "node --check server.js && node --check public/app.js && node --check public/home.js && node --check public/result.js && node --check public/credential-session.js && node --check src/domain.js && node --check src/google-client.js && node --check public/credential.js && node --check public/photo-crop.js && node --check public/registration-api.js && node --check public/site-config.js"
   },
-  "engines": { "node": ">=22.13.0" }
+  "engines": {
+    "node": ">=22.13.0"
+  }
 }

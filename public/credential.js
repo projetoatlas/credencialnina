@@ -1,3 +1,4 @@
+import { loadImage } from './photo-crop.js';
 export const AVATAR_EMOJI = { disco: '🪩', cool: '😎', fox: '🦊', cat: '🐱', butterfly: '🦋', robot: '🤖' };
 const L = ['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
 const G = ['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
@@ -34,13 +35,13 @@ let cachedPhoto = null;
 let cachedImage = null;
 async function loadPhoto(src) {
   if (cachedPhoto === src && cachedImage) return cachedImage;
-  const img = new Image(); img.src = src; await img.decode(); cachedPhoto = src; cachedImage = img; return img;
+  const img = await loadImage(src); cachedPhoto = src; cachedImage = img; return img;
 }
 const renders = new WeakMap();
 export async function drawCredential(canvas, card) {
   const version = (renders.get(canvas) || 0) + 1; renders.set(canvas, version);
   let photoImage = null;
-  if (card.photo) { try { photoImage = await loadPhoto(card.photo); } catch { /* Use the selected persona if the image cannot be decoded. */ } }
+  if (card.photo) photoImage = await loadPhoto(card.photo);
   if (renders.get(canvas) !== version) return;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, 720, 1060);

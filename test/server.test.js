@@ -27,11 +27,11 @@ test('HTTP: salva, recupera envio repetido, rejeita conflito e protege arquivos 
   const post = (body, headers = {}) => fetch(`${base}/api/registrations`, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: base, ...headers }, body: JSON.stringify(body) });
   const config = await (await fetch(`${base}/api/config`)).json();
   assert.equal(config.mode, 'local'); assert.equal('GOOGLE_SCRIPT_SECRET' in config, false);
-  for (const asset of ['/', '/cadastro.html', '/credencial.html', '/styles.css', '/app.js', '/home.js', '/result.js', '/credential-session.js', '/credential.js', '/favicon.svg', '/assets/fitdance-hero.png']) assert.equal((await fetch(base + asset)).status, 200, asset);
+  for (const asset of ['/', '/cadastro.html', '/credencial.html', '/styles.css', '/app.js', '/home.js', '/result.js', '/credential-session.js', '/credential.js', '/favicon.svg', '/assets/Tropa-da-Nina.jpg']) assert.equal((await fetch(base + asset)).status, 200, asset);
   const home = await (await fetch(base + '/')).text();
   const formPage = await (await fetch(base + '/cadastro.html')).text();
   const resultPage = await (await fetch(base + '/credencial.html')).text();
-  assert.match(home, /href="\/cadastro\.html"/); assert.doesNotMatch(home, /id="registration-form"|id="success-section"/);
+  assert.match(home, /href="\.\/cadastro\.html"/); assert.doesNotMatch(home, /id="registration-form"|id="success-section"/);
   assert.match(home, /id="countdown" data-event-date="2026-09-17T18:30:00-03:00"/); assert.match(home, /id="partnership-title"/); assert.match(home, /id="map-frame"/);
   assert.match(formPage, /id="registration-form"/); assert.doesNotMatch(formPage, /id="hero-title"|id="success-section"/);
   assert.match(resultPage, /id="result-canvas"/); assert.doesNotMatch(resultPage, /id="registration-form"|id="hero-title"/);

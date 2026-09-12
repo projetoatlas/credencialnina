@@ -42,7 +42,7 @@
             </div>
             <div class="photo-actions"><button type="button" class="button button-secondary" id="gallery-button"><span aria-hidden="true">▧</span> Escolher da galeria</button><button type="button" class="button button-secondary" id="camera-button"><span aria-hidden="true">◎</span> Tirar uma foto</button></div>
             <input type="file" id="gallery-input" accept="image/jpeg,image/png,image/webp" hidden><input type="file" id="capture-input" accept="image/*" capture="user" hidden>
-            <p id="photo-status" class="field-help" role="status">JPG, PNG ou WebP, até 10 MB. A foto será recortada no centro.</p><button type="button" id="remove-photo" class="text-button" hidden>Remover foto e usar personagem</button>
+            <p id="photo-status" class="field-help" role="status">JPG, PNG ou WebP, até 10 MB. Você pode ajustar o enquadramento antes de usar a foto.</p><button type="button" id="remove-photo" class="text-button" hidden>Remover foto e usar personagem</button>
           </fieldset>
           <fieldset class="form-section"><legend><span class="step-number">03</span> Uma festa feita por todos</legend>
             <fieldset class="choice-field"><legend>Você pode contribuir com comes e bebes? <span>*</span></legend><p>É opcional. O mais importante é ter você com a gente.</p><div class="inline-options"><label><input type="radio" name="contribution" value="yes" required> Sim, vou levar algo</label><label><input type="radio" name="contribution" value="no"> Desta vez não</label></div></fieldset>
@@ -55,6 +55,15 @@
     </section>
   </main>
   <footer class="footer wrap"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">✳</span> bora dançar<span class="brand-dot">.</span></a><p>Um encontro para celebrar em movimento.</p><span>FITDANCE · CAMPINAS</span></footer>
+  <dialog id="crop-dialog" aria-labelledby="crop-title">
+    <div class="dialog-top"><h2 id="crop-title">Sua foto, do seu jeito</h2><button type="button" class="close-button" id="crop-cancel" aria-label="Cancelar recorte">×</button></div>
+    <p>Arraste a foto e ajuste o zoom. O círculo mostra como ela vai aparecer na credencial.</p>
+    <div class="crop-stage"><canvas width="600" height="600" aria-label="Enquadramento da foto" id="crop-canvas"></canvas><div class="crop-mask" aria-hidden="true"></div></div>
+    <div class="crop-controls"><label for="crop-zoom">Zoom</label><input id="crop-zoom" type="range" min="1" max="3" step="0.01" value="1">
+    <label for="crop-x">Posição horizontal</label><input id="crop-x" type="range" min="0" max="100" step="0.1" value="50">
+    <label for="crop-y">Posição vertical</label><input id="crop-y" type="range" min="0" max="100" step="0.1" value="50"></div>
+    <button type="button" class="button button-primary" id="crop-confirm">Usar esta foto ↗</button>
+  </dialog>
   <dialog id="camera-dialog"><div class="dialog-top"><h2>Sorria, é sua credencial!</h2><button type="button" class="close-button" id="camera-close" aria-label="Fechar câmera">×</button></div><video id="camera-video" autoplay playsinline muted></video><p id="camera-status" role="status">Permita o acesso à câmera para tirar sua foto.</p><button type="button" class="button button-primary" id="take-photo" disabled>Capturar foto</button></dialog>
   <dialog id="privacy-dialog"><div class="dialog-top"><h2>Sobre seus dados</h2><button type="button" class="close-button" id="privacy-close" aria-label="Fechar informações de privacidade">×</button></div><p>Usamos nome, idade, WhatsApp, vínculo com a academia, personagem ou foto e respostas para organizar os convidados, emitir a credencial e planejar os comes e bebes.</p><p>O interesse em conhecer a academia será usado para solicitar o passe de um dia e permitir contato sobre ele. O passe depende de confirmação da unidade.</p><p id="privacy-storage"></p><p>Uma cópia da credencial fica temporariamente na sessão desta aba, para abrir e atualizar a página de visualização. Baixe a imagem para guardar no celular.</p><p>Para corrigir ou excluir seus dados, procure <span id="privacy-contact">a organização do evento</span>.</p><p>A foto é opcional: você pode escolher um personagem.</p></dialog>
 </body>

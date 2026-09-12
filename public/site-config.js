@@ -9,3 +9,6 @@ export const staticEventConfig = {
   dayPassNote: 'Marque seu interesse para solicitar um passe de um dia. A liberação e as condições serão confirmadas pela unidade.',
   privacyContact: 'a organização do evento', consentVersion: '2026-09-10-v1', mode: 'pages'
 };
+
+// URL pública da implantação; o segredo HMAC permanece somente no servidor.
+export const googleScriptUrl = "https://script.google.com/macros/s/AKfycbzKYv1H4_R4ClMccOZHhcUQfJNn8skQ5hIJQgMqvjjxXa68kNfA4QGgLM75hCj-02jF/exec";
