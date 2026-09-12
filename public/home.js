@@ -50,7 +50,7 @@ async function initialize() {
     $('#hero-unit').textContent = config.unit; $('#hero-city').textContent = config.city;
     $('#location-address').textContent = config.address;
     $('#what-to-bring').textContent = config.whatToBring; $('#entry-note').textContent = config.entryNote;
-    $('#demo-banner').hidden = false;
+    $('#demo-banner').hidden = config.mode !== 'local';
     updateCountdown();
   }
 }
