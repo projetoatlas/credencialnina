@@ -20,13 +20,11 @@ const PUBLIC_EVENT = {
   "consentVersion": "2026-09-10-v1"
 };
 const HEADERS = [
-  'Data do cadastro', 'ID do envio', 'Número de série', 'Nome completo', 'Primeiro nome',
-  'Idade', 'WhatsApp', 'Vínculo com a Smart Fit', 'Categoria da credencial',
-  'Interesse em conhecer a academia', 'Passe de um dia solicitado', 'Situação do passe',
-  'Contribui com comes e bebes', 'O que vai levar', 'Personagem ou foto', 'Foto no Drive',
-  'ID da foto', 'Cores da credencial', 'Consentimento', 'Versão do consentimento',
-  'Evento', 'Aniversariante', 'Data do evento', 'Horário do evento', 'Unidade', 'Cidade',
-  'ID da credencial', 'Impressão digital do envio', 'Dados da credencial'
+  'Data e hora da credencial', 'Nome completo', 'Idade', 'WhatsApp',
+  'Vínculo com a Smart Fit', 'Categoria da credencial', 'Conhecer a Smart',
+  'Passe de dia solicitado', 'Contribui com comes e bebes', 'O que vai levar', 'Foto',
+  'ID do envio (interno)', 'Número de série (interno)', 'ID da credencial (interno)',
+  'Impressão digital (interna)', 'Dados da credencial (internos)'
 ];
 
 function setup() {
@@ -43,14 +41,18 @@ function setup() {
   if (!props.getProperty('MINIMUM_AGE')) props.setProperty('MINIMUM_AGE', '17');
   if (!props.getProperty('SHEET_NAME')) props.setProperty('SHEET_NAME', 'Convidados');
   const sheet = getSheet_(props);
+  // Remove as colunas antigas depois que os cabeçalhos simplificados forem conferidos.
+  if (sheet.getMaxColumns() > HEADERS.length) sheet.deleteColumns(HEADERS.length + 1, sheet.getMaxColumns() - HEADERS.length);
   sheet.setFrozenRows(1);
   sheet.getRange(1, 1, 1, HEADERS.length).setBackground('#29212e').setFontColor('#ffffff').setFontWeight('bold').setWrap(true);
   sheet.setRowHeight(1, 44);
-  sheet.setColumnWidth(4, 240);
-  sheet.setColumnWidth(14, 240);
-  sheet.setColumnWidth(16, 220);
-  // As colunas auxiliares continuam na planilha, mas ficam recolhidas.
-  sheet.hideColumns(28, 2);
+  sheet.setColumnWidth(1, 180);
+  sheet.setColumnWidth(2, 240);
+  sheet.setColumnWidth(4, 150);
+  sheet.setColumnWidth(10, 240);
+  sheet.setColumnWidth(11, 260);
+  // Cinco colunas técnicas ficam ocultas para manter a visão da organização simples.
+  sheet.hideColumns(12, 5);
   SpreadsheetApp.flush();
   console.log('Planilha: https://docs.google.com/spreadsheets/d/' + props.getProperty('SPREADSHEET_ID') + '/edit');
   console.log('Pasta privada: https://drive.google.com/drive/folders/' + props.getProperty('PHOTO_FOLDER_ID'));
@@ -67,6 +69,7 @@ function getSheet_(props) {
   // Evita escrever sob cabeçalhos trocados manualmente.
   const headers = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
   if (headers.join('|') !== HEADERS.join('|')) throw new Error('SCHEMA_MISMATCH');
+  if (sheet.getMaxColumns() > HEADERS.length) sheet.deleteColumns(HEADERS.length + 1, sheet.getMaxColumns() - HEADERS.length);
   return sheet;
 }
 
@@ -103,9 +106,9 @@ function doPost(e) {
     const sheet = getSheet_(props);
     const lastRow = sheet.getLastRow();
     if (lastRow > 1) {
-      const previous = sheet.getRange(2, 2, lastRow - 1, 1).createTextFinder(record.requestId).matchEntireCell(true).useRegularExpression(false).findNext();
+      const previous = sheet.getRange(2, 12, lastRow - 1, 1).createTextFinder(record.requestId).matchEntireCell(true).useRegularExpression(false).findNext();
       if (previous) {
-        const saved = sheet.getRange(previous.getRow(), 28, 1, 2).getValues()[0];
+        const saved = sheet.getRange(previous.getRow(), 15, 1, 2).getValues()[0];
         if (String(saved[0]) !== message.fingerprint) return output_({ ok: false, code: 'IDEMPOTENCY_CONFLICT' });
         return output_({ ok: true, storage: 'google', duplicate: true, credential: JSON.parse(String(saved[1])) });
       }
@@ -113,7 +116,7 @@ function doPost(e) {
     // O código de barras é único nesta lista, inclusive se houver uma colisão aleatória.
     let serial = record.serial;
     for (let attempt = 0; attempt < 10; attempt++) {
-      const found = lastRow > 1 && sheet.getRange(2, 3, lastRow - 1, 1).createTextFinder(serial).matchEntireCell(true).useRegularExpression(false).findNext();
+      const found = lastRow > 1 && sheet.getRange(2, 13, lastRow - 1, 1).createTextFinder(serial).matchEntireCell(true).useRegularExpression(false).findNext();
       if (!found) break;
       serial = randomSerial_();
       if (attempt === 9) throw new Error('SERIAL_COLLISION');
@@ -137,13 +140,11 @@ function doPost(e) {
       dayPassRequested: record.dayPassRequested
     };
     const row = [
-      record.createdAt, record.requestId, record.serial, record.fullName, record.firstName,
-      record.age, record.whatsapp, record.membership, record.category,
-      record.interest ? 'Sim' : 'Não', record.dayPassRequested ? 'Sim' : 'Não', record.dayPassStatus,
-      record.contribution ? 'Sim' : 'Não', record.contributionItem, record.avatar, photoUrl,
-      photoId, record.palette.join(' → '), 'Sim', record.consentVersion,
-      record.event.title, record.event.instructorName || '', record.event.date || '', record.event.time || '',
-      record.event.unit, record.event.city, record.id, message.fingerprint, JSON.stringify(credential)
+      record.createdAt, record.fullName, record.age, record.whatsapp,
+      membershipLabel_(record.membership), record.category, record.interest ? 'Sim' : 'Não',
+      record.dayPassRequested ? 'Sim' : 'Não', record.contribution ? 'Sim' : 'Não',
+      record.contributionItem, photoUrl, record.requestId, record.serial, record.id,
+      message.fingerprint, JSON.stringify(credential)
     ];
     // Tudo em texto preserva zeros do código e do WhatsApp; escape evita fórmulas.
     const range = sheet.getRange(sheet.getLastRow() + 1, 1, 1, row.length);
@@ -182,6 +183,9 @@ function hex_(bytes) { return bytes.map(function (b) { return ((b + 256) % 256).
 function safeEqual_(a, b) { if (a.length !== b.length) return false; let diff = 0; for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i); return diff === 0; }
 function eanCheck_(base) { let sum = 0; for (let i = 0; i < 12; i++) sum += Number(base[i]) * (i % 2 ? 3 : 1); return String((10 - sum % 10) % 10); }
 function randomSerial_() { const raw = Utilities.getUuid().replace(/[^0-9]/g, '') + Utilities.getUuid().replace(/[^0-9]/g, ''); const base = raw.slice(0, 12).padEnd(12, '0'); return base + eanCheck_(base); }
+function membershipLabel_(value) {
+  return ({ guest: 'Ainda não sou aluno', other: 'Sou de outra unidade', unit: 'Sou aluno desta unidade', black: 'Tenho plano Black' })[value] || value;
+}
 function output_(body) { return ContentService.createTextOutput(JSON.stringify(body)).setMimeType(ContentService.MimeType.JSON); }
 
 // Somente campos permitidos entram no registro. Série, categoria e evento vêm do servidor.

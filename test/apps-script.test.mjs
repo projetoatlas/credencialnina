@@ -84,6 +84,7 @@ function mockRuntime({ configured = true, canLock = true } = {}) {
     setRowHeight() { return this; }
     setColumnWidth() { return this; }
     hideColumns() { return this; }
+    deleteColumns(start, count) { assert.equal(start, 17); this.cols -= count; this.cells.forEach(row => row.splice(start - 1, count)); return this; }
   }
   const book = {
     getId: () => 'book-id',
@@ -161,12 +162,12 @@ test('expired past and future signatures reject before acquiring lock', () => {
   assert.equal(h.state.events.length, 0);
 });
 
-test('valid request writes exactly 29 text cells, preserves Unicode and leading-zero serial, flushes before releasing', () => {
+test('valid request writes visible fields plus hidden metadata, preserving Unicode and leading-zero serial', () => {
   const h = mockRuntime(); const r = makeRecord(); const reply = h.send(r);
   assert.equal(reply.ok, true); assert.equal(reply.credential.serial, r.serial); assert.equal(reply.credential.fullName, r.fullName);
-  assert.equal(h.sheet().getMaxColumns(), 29); assert.equal(h.sheet().getLastRow(), 2);
-  assert.equal(h.sheet().cells[1].length, 29); assert.equal(h.sheet().cells[1][2], r.serial);
-  assert.equal(h.sheet().cells[1][3], r.fullName); assert.equal(h.sheet().cells[1][13], r.contributionItem);
+  assert.equal(h.sheet().getMaxColumns(), 16); assert.equal(h.sheet().getLastRow(), 2);
+  assert.equal(h.sheet().cells[1].length, 16); assert.equal(h.sheet().cells[1][12], r.serial);
+  assert.equal(h.sheet().cells[1][1], r.fullName); assert.equal(h.sheet().cells[1][9], r.contributionItem);
   assert.ok(h.state.rawWrites[0].values[0].every(value => typeof value === 'string'));
   assert.equal(h.state.rawWrites[0].format, '@'); assert.deepEqual(h.state.events.slice(-2), ['flush', 'release']);
   assert.equal(h.state.locked, false); assert.equal(Object.hasOwn(reply.credential, 'whatsapp'), false);
@@ -191,7 +192,7 @@ test('formula escape covers = + - @ and whitespace while leaving normal text unc
   assert.equal(h.context.sheetText_('Bolo 🎂'), 'Bolo 🎂'); assert.equal(h.context.sheetText_(null), '');
   const injection = '=IMPORTXML("https://invalid.example", "//x")';
   assert.equal(h.send(makeRecord({ contributionItem: injection })).ok, true);
-  assert.equal(h.state.rawWrites[0].values[0][13], "'" + injection);
+  assert.equal(h.state.rawWrites[0].values[0][9], "'" + injection);
 });
 
 test('serial collision is regenerated and saved once under a valid EAN checksum', () => {
@@ -200,7 +201,7 @@ test('serial collision is regenerated and saved once under a valid EAN checksum'
   h.context.randomSerial_ = () => { generated++; return replacement; };
   const second = h.send(makeRecord({ requestId: randomUUID(), id: randomUUID(), serial: first.serial }));
   assert.equal(second.ok, true); assert.equal(second.credential.serial, replacement); assert.equal(generated, 1);
-  assert.equal(h.sheet().cells[2][2], replacement); assert.equal(h.sheet().getLastRow(), 3);
+  assert.equal(h.sheet().cells[2][12], replacement); assert.equal(h.sheet().getLastRow(), 3);
   assert.equal(replacement[12], checksum(replacement.slice(0, 12)));
 });
 
@@ -219,7 +220,7 @@ test('photo file is reused after a sheet failure; response excludes photo payloa
   assert.deepEqual(h.send(r, { fingerprint: fp }), { ok: false, code: 'SAVE_FAILED' });
   assert.equal(h.state.fileCreates, 1); assert.equal(h.sheet().getLastRow(), 1); assert.equal(h.state.locked, false);
   const result = h.send(r, { fingerprint: fp }); assert.equal(result.ok, true); assert.equal(h.state.fileCreates, 1);
-  assert.equal(h.sheet().cells[1][16], 'photo-1'); assert.equal(Object.hasOwn(result.credential, 'photo'), false); assert.equal(Object.hasOwn(result.credential, 'whatsapp'), false);
+  assert.match(h.sheet().cells[1][10], /drive.google.com/); assert.equal(Object.hasOwn(result.credential, 'photo'), false); assert.equal(Object.hasOwn(result.credential, 'whatsapp'), false);
   const again = h.send(r, { fingerprint: fp }); assert.equal(again.duplicate, true); assert.equal(h.state.fileCreates, 1); assert.equal(h.sheet().getLastRow(), 2);
 });
 
@@ -233,7 +234,7 @@ test('invalid data, invalid checksum, and busy lock do not write registrations',
 test('setup can run twice without recreating configured resources or appending duplicate headers', () => {
   const h = mockRuntime({ configured: false }); h.context.setup(); const secret = h.state.props.get('SHARED_SECRET'); h.context.setup();
   assert.equal(h.state.props.get('SHARED_SECRET'), secret); assert.equal(secret.length, 64); assert.equal(h.state.props.get('MINIMUM_AGE'), '17');
-  assert.equal(h.sheet().getLastRow(), 1); assert.equal(h.sheet().getMaxColumns(), 29);
+  assert.equal(h.sheet().getLastRow(), 1); assert.equal(h.sheet().getMaxColumns(), 16);
 });
 
 function publicSend(h, overrides = {}) {
@@ -268,6 +269,6 @@ test('Pages stores uploaded photo privately and excludes photo bytes/contact fro
  assert.equal(result.ok,true); assert.equal(h.state.fileCreates,1);
  assert.equal(result.credential.avatar,'photo');
  assert.equal(result.credential.photo,undefined); assert.equal(result.credential.whatsapp,undefined);
- assert.equal(h.sheet().cells[1][14],'photo'); assert.match(h.sheet().cells[1][15],/drive.google.com/);
+ assert.equal(h.sheet().cells[1][10].startsWith('https://drive.google.com'),true);
  assert.equal(publicSend(h,{photo}).duplicate,true); assert.equal(h.state.fileCreates,1);
 });

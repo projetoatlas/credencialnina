@@ -84,7 +84,7 @@ O manifesto `google-apps-script/appsscript.json` também está incluído. Se qui
 1. Clique em **Implantar → Nova implantação**.
 2. Selecione **Aplicativo da Web**.
 3. Em **Executar como**, selecione **Eu** (a conta que autorizou o script).
-4. Em **Quem pode acessar**, selecione **Qualquer pessoa**. Embora o endpoint seja acessível, o script recusa envios sem a assinatura secreta do servidor e nunca lista os convidados.
+4. Em **Quem pode acessar**, selecione **Qualquer pessoa**. O formulário público valida os campos e grava somente os dados permitidos; o endpoint nunca lista os convidados.
 5. Implante e copie a URL terminada em **`/exec`**. A URL `/dev` não serve para esta configuração.
 
 Contas corporativas podem impedir esse tipo de implantação. Nesse caso, é necessário que o administrador permita essa opção ou que seja usada uma conta autorizada a disponibilizá-la.
@@ -103,7 +103,7 @@ PUBLIC_ORIGIN=
 TRUSTED_PROXY_IPS=
 ```
 
-Reinicie o servidor. O aviso de demonstração desaparece. Faça um cadastro de teste, confira a nova linha na aba **Convidados** e, se enviou foto, confira o link na coluna **Foto no Drive**. Exclua o cadastro e a foto de teste depois dessa verificação.
+Reinicie o servidor. Faça um cadastro de teste, confira a nova linha na aba **Convidados** e, se enviou foto, confira o link na coluna **Foto**. Exclua o cadastro e a foto de teste depois dessa verificação.
 
 **No modo Google, falhas de salvamento impedem a emissão da credencial.** O servidor não passa silenciosamente para armazenamento local. Repetir o mesmo envio recupera a credencial existente, sem acrescentar outra linha. Se você alterar o formulário depois de um envio confirmado cuja resposta se perdeu, pode receber uma mensagem de conflito; procure a organização para corrigir o registro.
 
@@ -117,9 +117,9 @@ Se o relógio do computador diferir do relógio do Google, o cliente ajusta o ho
 
 ### O que fica salvo
 
-A planilha tem 29 colunas: data do cadastro, ID do envio, série, nome completo, primeiro nome, idade, WhatsApp, vínculo, categoria, interesse, solicitação e situação do passe, contribuição e item, personagem/foto, link e ID da foto, cores, consentimento e versão, informações do evento, ID da credencial e controles de reenvio. As duas últimas colunas são auxiliares e ficam ocultas.
+A planilha mostra 11 colunas: data e hora da credencial, nome completo, idade, WhatsApp, vínculo com a Smart Fit, categoria da credencial, conhecer a Smart, passe de dia solicitado, contribuição com comes e bebes, o que vai levar e foto. Cinco colunas técnicas ficam ocultas para impedir duplicidades e manter a credencial vinculada ao registro.
 
-Fotos enviadas ficam no **Google Drive**, com link na linha correspondente. Um personagem padrão é salvo pelo seu identificador; a credencial usa o emoji desse personagem. Não são criados links públicos de fotos. Mantenha a planilha e a pasta restritas às pessoas que organizam o evento.
+Fotos enviadas ficam no **Google Drive** privado, com link na coluna **Foto**. Um personagem padrão aparece na credencial quando a pessoa não envia foto. Não são criados links públicos de fotos. Mantenha a planilha e a pasta restritas às pessoas que organizam o evento.
 
 ## Modo de demonstração
 
