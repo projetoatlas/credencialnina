@@ -8,12 +8,19 @@
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --watch --env-file-if-exists=.env server.js",
     "test": "node --test",
-    "check": "node --check server.js && node --check public/app.js && node --check public/home.js && node --check public/result.js && node --check public/credential-session.js && node --check src/domain.js"
+    "check": "node scripts/check.mjs",
+    "build:vendor": "node scripts/build-vendor.mjs",
+    "test:browser": "playwright test"
   },
   "dependencies": {
-    "qrcode": "^1.5.3"
+    "qrcode": "1.5.4"
   },
   "engines": {
     "node": ">=22.13.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "esbuild": "0.28.2",
+    "jsqr": "1.4.0"
   }
 }

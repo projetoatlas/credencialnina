@@ -1,15 +1,29 @@
 import { loadImage } from './photo-crop.js';
-import QRCode from 'qrcode';
+import QRCode from './vendor/qrcode.js';
 
 export const AVATAR_EMOJI = { disco: '🪩', cool: '😎', fox: '🦊', cat: '🐱', butterfly: '🦋', robot: '🤖' };
 
-export async function generateQRCode(serial, size = 200) {
+// A série continua EAN-13 na planilha; o QR Code representa a mesma série.
+const L = ['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+const G = ['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
+const R = ['1110010','1100110','1101100','1000010','1011100','1001110','1010000','1000100','1001000','1110100'];
+const PARITY = ['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+export function barcodeBits(serial) {
   if (!/^\d{13}$/.test(serial)) throw new Error('Número de série inválido.');
+  const check = (10 - [...serial.slice(0, 12)].reduce((sum, n, i) => sum + Number(n) * (i % 2 ? 3 : 1), 0) % 10) % 10;
+  if (check !== Number(serial[12])) throw new Error('Dígito verificador inválido.');
+  let bits = '101';
+  for (let i = 1; i <= 6; i++) bits += (PARITY[Number(serial[0])][i - 1] === 'L' ? L : G)[Number(serial[i])];
+  bits += '01010';
+  for (let i = 7; i <= 12; i++) bits += R[Number(serial[i])];
+  return bits + '101';
+}
+
+export async function generateQRCode(serial, size = 174) {
+  barcodeBits(serial);
   return await QRCode.toCanvas(serial, {
     errorCorrectionLevel: 'H',
-    type: 'image/png',
-    quality: 0.95,
-    margin: 1,
+    margin: 4,
     width: size,
     color: { dark: '#211d27', light: '#fffdf9' }
   });
@@ -49,6 +63,7 @@ export async function drawCredential(canvas, card) {
   const version = (renders.get(canvas) || 0) + 1; renders.set(canvas, version);
   let photoImage = null;
   if (card.photo) photoImage = await loadPhoto(card.photo);
+  const qrCanvas = card.serial ? await generateQRCode(card.serial) : null;
   if (renders.get(canvas) !== version) return;
   
   const ctx = canvas.getContext('2d');
@@ -86,25 +101,15 @@ export async function drawCredential(canvas, card) {
   ctx.fillStyle = '#211d27';
   
   if (card.serial) {
-    try {
-      // Gerar QR Code
-      const qrCanvas = await generateQRCode(card.serial, 200);
-      const qrSize = 180;
-      const qrX = (720 - qrSize) / 2;
-      ctx.drawImage(qrCanvas, qrX, 855, qrSize, qrSize);
-      
-      // Número de série abaixo do QR Code
-      ctx.font = '24px Consolas, monospace'; ctx.fillText(card.serial, 360, 1010);
-    } catch (error) {
-      console.error('Erro ao gerar QR Code:', error);
-      ctx.fillStyle = '#dfd9e1'; ctx.beginPath(); ctx.roundRect(112, 861, 496, 79, 9); ctx.fill(); ctx.fillStyle = '#746b7c'; ctx.font = '600 19px "Segoe UI", Arial, sans-serif'; ctx.fillText('QR Code não disponível', 360, 907);
-    }
+    // Sem redimensionamento ou texto sobre o QR: preserva módulos e margem de leitura.
+    ctx.drawImage(qrCanvas, (720 - qrCanvas.width) / 2, 831);
+    ctx.font = '18px Consolas, monospace'; ctx.fillText(card.serial, 360, 1025);
   } else { 
     ctx.fillStyle = '#dfd9e1'; ctx.beginPath(); ctx.roundRect(112, 861, 496, 79, 9); ctx.fill(); ctx.fillStyle = '#746b7c'; ctx.font = '600 19px "Segoe UI", Arial, sans-serif'; ctx.fillText('Prévia · Código será gerado', 360, 907);
   }
   
-  ctx.fillStyle = card.demo ? '#9d3153' : '#716975'; ctx.font = '600 17px "Segoe UI", Arial, sans-serif';
-  ctx.fillText(card.demo ? 'DEMONSTRAÇÃO · SEM VALIDADE PARA ENTRADA' : card.serial ? 'SCANEIE O QR CODE NA RECEPÇÃO' : 'PRÉVIA · NÃO VÁLIDA PARA ENTRADA', 360, 1050);
+  ctx.fillStyle = card.demo ? '#9d3153' : '#716975'; ctx.font = '600 15px "Segoe UI", Arial, sans-serif';
+  ctx.fillText(card.demo ? 'DEMONSTRAÇÃO · SEM VALIDADE PARA ENTRADA' : card.serial ? 'APRESENTE COM DOCUMENTO NA RECEPÇÃO' : 'PRÉVIA · NÃO VÁLIDA PARA ENTRADA', 360, 1048);
   
   ctx.restore();
   canvas.setAttribute('aria-label', `${card.serial ? 'Credencial' : 'Prévia'} de ${card.fullName || 'nome e sobrenome'}. ${card.category || 'Categoria a selecionar'}.${card.serial ? ` Série ${card.serial}` : ''}`);

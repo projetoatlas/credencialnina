@@ -32,7 +32,7 @@ test('HTTP: salva, recupera envio repetido, rejeita conflito e protege arquivos 
   const formPage = await (await fetch(base + '/cadastro.html')).text();
   const resultPage = await (await fetch(base + '/credencial.html')).text();
   assert.match(home, /href="\.\/cadastro\.html"/); assert.doesNotMatch(home, /id="registration-form"|id="success-section"/);
-  assert.match(home, /id="countdown" data-event-date="2026-09-17T18:30:00-03:00"/); assert.match(home, /id="partnership-title"/); assert.match(home, /id="map-frame"/);
+  assert.ok(home.includes(`id="countdown" data-event-date="${config.date}T${config.time.replace('h', ':')}:00-03:00"`)); assert.match(home, /id="partnership-title"/); assert.match(home, /id="map-frame"/);
   assert.match(formPage, /id="registration-form"/); assert.doesNotMatch(formPage, /id="hero-title"|id="success-section"/);
   assert.match(resultPage, /id="result-canvas"/); assert.doesNotMatch(resultPage, /id="registration-form"|id="hero-title"/);
   const payload = { requestId: randomUUID(), fullName: 'Convidada de Teste', age: 25, whatsapp: '19999991234', membership: 'guest', interest: true, contribution: true, contributionItem: '=IMPORTXML("teste")', consent: true, avatar: 'fox' };

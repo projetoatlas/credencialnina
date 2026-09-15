@@ -55,9 +55,12 @@ async function initialize() {
       await downloadCredentialImage();
       markDownloaded(credential);
     }
+    downloadButton.hidden = false;
+    downloadButton.disabled = false;
+    $('#success-title').textContent = 'Sua credencial está pronta!';
     $('#success-message').textContent = credential.demo
       ? 'A credencial de demonstração foi baixada para este dispositivo. Ela não confirma entrada na academia.'
-      : 'Sua credencial foi salva automaticamente no dispositivo. Apresente-a com um documento na recepção da Smart Fit.';
+      : 'O download da sua credencial foi iniciado. Procure o arquivo em Downloads. Se ele não aparecer, toque em “Baixar novamente”.';
   } catch {
     downloadButton.hidden = false;
     downloadButton.disabled = false;
@@ -70,10 +73,10 @@ downloadButton.addEventListener('click', async () => {
   try {
     await downloadCredentialImage();
     markDownloaded(credential);
-    button.hidden = true;
+    button.hidden = false;
     $('#success-message').textContent = credential.demo
       ? 'A credencial de demonstração foi baixada para este dispositivo. Ela não confirma entrada na academia.'
-      : 'Sua credencial foi salva no dispositivo. Apresente-a com um documento na recepção da Smart Fit.';
+      : 'O download foi iniciado novamente. Apresente a credencial com um documento na recepção da Smart Fit.';
   } catch {
     $('#success-message').textContent = 'Não foi possível baixar a imagem agora. Tente novamente ou salve uma captura da credencial.';
   } finally { button.disabled = false; }

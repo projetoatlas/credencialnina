@@ -2,7 +2,7 @@
 
 ## Publicar no GitHub Pages
 
-O projeto já inclui `.github/workflows/pages.yml` e `.nojekyll`. Envie o conteúdo desta pasta para um repositório GitHub, use a branch `main` ou `master` e, em **Settings → Pages**, selecione **GitHub Actions**. A cada push, o workflow publica a pasta `public/` automaticamente.
+O projeto já inclui `.github/workflows/pages.yml` e `.nojekyll`. Envie o conteúdo desta pasta para um repositório GitHub, use a branch `main` ou `master` e, em **Settings → Pages**, selecione **GitHub Actions**. A cada push, o workflow verifica os imports, executa os testes e só então publica a pasta `public/`. Pull requests também passam pela verificação, sem publicar.
 
 O GitHub Pages publica a pasta public/ e o formulário envia diretamente ao Google Apps Script indicado em public/site-config.js. O envio usa POST com JSON em text/plain e aguarda a confirmação real da planilha antes de abrir a credencial. Falhas de conexão nunca geram uma credencial de demonstração.
 
@@ -26,6 +26,22 @@ node --env-file-if-exists=.env server.js
 
 Não é necessário executar `npm install`. O servidor Node usa a API local. No Pages ou em um servidor estático, o formulário usa a implantação pública do Apps Script. Abra por HTTP/HTTPS, não diretamente como arquivo.
 
+## Verificar alterações antes de publicar
+
+Para desenvolver e executar as verificações, instale o pnpm 11.19.0 e execute:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm check
+pnpm test
+pnpm exec playwright install chromium
+pnpm test:browser
+```
+
+O teste de navegador usa os arquivos reais de `public/` no caminho `/credencialnina/`, com respostas simuladas da planilha. Ele verifica o envio com personagem e foto recortada, a sessão, o download em PNG, a leitura do QR Code e uma falha de salvamento. Não acrescenta convidados de teste na planilha real.
+
+O QR Code usa uma versão para navegador incluída em `public/vendor/qrcode.js`, com sua licença. Para regenerá-la após atualizar a dependência, execute `pnpm build:vendor` e inclua os arquivos gerados no commit. Não use `import QRCode from 'qrcode'` nos arquivos públicos: o Pages serve JavaScript diretamente e não resolve pacotes npm. A série e seu dígito verificador permanecem compatíveis com os registros existentes.
+
 ## O que está pronto
 
 O site tem três páginas: **`/`** com as informações do aulão, **`/cadastro.html`** com o formulário e a prévia, e **`/credencial.html`** com a credencial gerada e o download. O formulário abre a página final somente depois da confirmação do salvamento.
@@ -38,7 +54,7 @@ A página final usa uma cópia temporária da credencial na sessão da mesma aba
 - Pergunta sobre interesse em conhecer a academia; para convidados interessados, registra a solicitação do passe de um dia.
 - Foto da galeria, captura com câmera ou seis personagens. A foto passa por uma janela de recorte com arraste, zoom e controles de posição, é reduzida para 600 × 600 e convertida em JPEG, sem conservar os metadados do arquivo original.
 - Contribuição opcional com comes e bebes; o detalhe é obrigatório se a resposta for “sim”.
-- Credencial com degradê sorteado, foto/personagem, primeiro nome grande, nome completo, categoria, evento e código EAN-13 com número aleatório e dígito verificador.
+- Credencial com degradê sorteado, foto/personagem, primeiro nome grande, nome completo, categoria, evento e QR Code com série aleatória de 13 dígitos e dígito verificador.
 - Download da credencial em PNG, proteção contra duplo envio e confirmação somente depois de salvar.
 - Código do Google Apps Script para criar a planilha, salvar todas as respostas e guardar fotos em uma pasta privada no Drive.
 
